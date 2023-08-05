@@ -12,4 +12,5 @@ COPY . .
 
 CMD ["flask", "run", "--host", "0.0.0.0"]
 
-# $ docker run -dp 5000:5000 -w /app -v "$(pwd):/app" flask-smorest-api
+# $ docker build -t store-api .
+# $ docker run -dp 5000:5000 flask-smorest-api
