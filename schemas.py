@@ -13,6 +13,7 @@ class PlainStoreSchema(Schema):
 class ItemUpdateSchema(Schema):
     name = fields.Str() # required 0 or 1
     price = fields.Float() # required 0 or 1  
+    store_id = fields.Int() # required 0 or 1
 
 class ItemSchema(PlainItemSchema):
     store_id = fields.Int(required=True, load_only=True) # receiving data from client (POST,UPDATE)
