@@ -2,22 +2,22 @@ from marshmallow import Schema, fields
 # marshmallow is used for better validation
 
 class PlainItemSchema(Schema):
-    id = fields.Int(dump_only=True) # required 0
-    name = fields.Str(required=True) # required 1
-    price = fields.Float(required=True) # required 1
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
+    price = fields.Float(required=True)
 
 class PlainStoreSchema(Schema):
-    id = fields.Int(dump_only=True) # required 0
-    name = fields.Str(required=True) # required 1
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
 
 class PlainTagSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
 
 class ItemUpdateSchema(Schema):
-    name = fields.Str() # required 0 or 1
-    price = fields.Float() # required 0 or 1  
-    store_id = fields.Int() # required 0 or 1
+    name = fields.Str()
+    price = fields.Float()  
+    store_id = fields.Int()
 
 class ItemSchema(PlainItemSchema):
     store_id = fields.Int(required=True, load_only=True) # receiving data from client (POST,UPDATE)
@@ -37,3 +37,9 @@ class TagAndItemSchema(Schema):
     message = fields.Str()
     item = fields.Nested(ItemSchema)
     tag = fields.Nested(TagSchema)
+
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    username = fields.Str(required=True)
+    password = fields.Str(required=True, load_only=True)
+    # load_only=True significa que o client-side nunca vai receber seu valor, nem mesmo logando.

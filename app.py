@@ -7,11 +7,15 @@ return {"items": store["items"], "message": "Sua requisição foi um sucesso!"}
 então no front end é só puxar store.items[item_id].message.
 """
 import os
+import secrets
 
 from flask import Flask
 from flask_smorest import Api
+from flask_jwt_extended import JWTManager
+
 from db import db
 import models  # this trigger __init__.py in models folder
+
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
 from resources.tag import blp as TagBlueprint
@@ -33,6 +37,9 @@ def create_app(db_url=None):
   db.init_app(app) # inicia flask SQLAlchemy e ainda "invoca" o proprio Flask(app = Flask(__name__)) em si para se conectarem
 
   api = Api(app)
+  
+  app.config["JWT_SECRET_KEY"] = "227908941795316218633443429225171957379"
+  jwt = JWTManager(app)
 
   with app.app_context(): 
     db.create_all() # este comando vai criar todas as tabelas no banco
