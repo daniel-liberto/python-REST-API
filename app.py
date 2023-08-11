@@ -14,7 +14,7 @@ from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
 from db import db
-from blocklist import BLOCKLIST
+from blocklist import ACCESS_EXPIRES, jwt_redis_blocklist
 import models  # this trigger __init__.py in models folder
 
 from resources.item import blp as ItemBlueprint
@@ -41,12 +41,24 @@ def create_app(db_url=None):
   api = Api(app)
   
   app.config["JWT_SECRET_KEY"] = "227908941795316218633443429225171957379"
+  app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
   jwt = JWTManager(app)
   
-  # -------------- Logout section-----------------
+
+  
+  # -----------Check if token exist in redis----------------
   @jwt.token_in_blocklist_loader
-  def check_if_token_in_blocklist(jwt_header, jwt_payload):
-    return jwt_payload["jti"] in BLOCKLIST
+  def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
+    jti = jwt_payload["jti"]
+    token_in_redis = jwt_redis_blocklist.get(jti)
+    return token_in_redis is not None
+  # -----------Check if token exist in redis----------------
+  
+  
+  # -------------- Logout section-----------------
+  # @jwt.token_in_blocklist_loader
+  # def check_if_token_in_blocklist(jwt_header, jwt_payload):
+  #   return jwt_payload["jti"] in BLOCKLIST
   
   @jwt.revoked_token_loader
   def revoked_token_callback(jwt_header, jwt_payload):

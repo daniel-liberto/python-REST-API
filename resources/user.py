@@ -4,7 +4,8 @@ from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 
 from db import db
-from blocklist import BLOCKLIST
+from app import ACCESS_EXPIRES, jwt_redis_blocklist
+# from blocklist import BLOCKLIST
 from models import UserModel
 from schemas import UserSchema
 
@@ -38,14 +39,24 @@ class UserLogin(MethodView):
     abort(401, message="Invalid credentials.")
 
   # -------------- Logout section-----------------
+# @blp.route("/logout")
+# class UserLogout(MethodView):
+#   @jwt_required()
+#   def post(self):
+#     jti = get_jwt()["jti"]
+#     BLOCKLIST.add(jti)
+#     return {"message": "Successfully logged out."}
+  # -------------- Logout section-----------------
+
+# -----------------Logout Redis Section-----------
 @blp.route("/logout")
 class UserLogout(MethodView):
   @jwt_required()
-  def post(self):
+  def delete(self):
     jti = get_jwt()["jti"]
-    BLOCKLIST.add(jti)
+    jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
     return {"message": "Successfully logged out."}
-  # -------------- Logout section-----------------
+# -----------------Logout Redis Section-----------
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
