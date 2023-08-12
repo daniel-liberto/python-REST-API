@@ -18,7 +18,7 @@ class Item(MethodView):
         item = ItemModel.query.get_or_404(item_id) #get or 404 é auto explicativo (flask-sqlalchemy)
         return item
 
-    @jwt_required()
+    @jwt_required(fresh=True)
     def delete(self, item_id):
         # ----------optional jwt claims verification --------
         jwt = get_jwt()
@@ -57,7 +57,7 @@ class ItemList(MethodView):
     
     # ItemSchema não está apenas validando o tipo de dado recebido, mas tambem fazendo:
     # item_data = request.get_json(), ou seja um "auto-fetch"
-    @jwt_required() # post requer um token jwt
+    @jwt_required(fresh=True) # post requer um token jwt "recente/fresh"
     @blp.arguments(ItemSchema)
     @blp.response(201, ItemSchema)
     def post(self, item_data):

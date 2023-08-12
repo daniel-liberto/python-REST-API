@@ -6,7 +6,7 @@ from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 
 from db import db
-from blocklist import ACCESS_EXPIRES, jwt_redis_blocklist
+from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES,jwt_redis_blocklist
 import models  # this trigger __init__.py in models folder
 
 from resources.item import blp as ItemBlueprint
@@ -34,6 +34,7 @@ def create_app(db_url=None):
   
   app.config["JWT_SECRET_KEY"] = "227908941795316218633443429225171957379"
   app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
+  app.config["JWT_REFRESH_TOKEN_EXPIRES"] = REFRESH_EXPIRES
   jwt = JWTManager(app)
   
   # -----------------Redis check token----------------------
@@ -47,6 +48,10 @@ def create_app(db_url=None):
   @jwt.revoked_token_loader
   def revoked_token_callback(jwt_header, jwt_payload):
     return (jsonify({"description": "The token has been revoked.", "error": "token_revoked"}), 401)
+
+  @jwt.needs_fresh_token_loader
+  def token_not_fresh_callback(jwt_header, jwt_payload):
+    return (jsonify({"description": "The token is not fresh.", "error": "token_required"}), 401)
 
   # optional extra info para o jwt em todas as vezes que um token é gerado
   @jwt.additional_claims_loader
