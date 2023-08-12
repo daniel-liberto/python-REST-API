@@ -36,8 +36,6 @@ def create_app(db_url=None):
   app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
   jwt = JWTManager(app)
   
-
-  
   # -----------------Redis check token----------------------
   @jwt.token_in_blocklist_loader
   def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
@@ -46,12 +44,10 @@ def create_app(db_url=None):
     return token_in_redis is not None
   # -----------------Redis check token----------------------
   
-
   @jwt.revoked_token_loader
   def revoked_token_callback(jwt_header, jwt_payload):
     return (jsonify({"description": "The token has been revoked.", "error": "token_revoked"}), 401)
 
-  
   # optional extra info para o jwt em todas as vezes que um token é gerado
   @jwt.additional_claims_loader
   def add_claims_to_jwt(identity): # identity(user.id) = vem do user.py(resource)/access_token(linha 35)
