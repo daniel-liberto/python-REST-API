@@ -1,11 +1,3 @@
-"""
-# ANOTAÇÕES
-retornar [] ou {}?
-retornando uma [], isso impede que novas propriedades sejam adicionadas.
-Já com {} poderia adicionar novas propriedades e ficar assim:
-return {"items": store["items"], "message": "Sua requisição foi um sucesso!"}
-então no front end é só puxar store.items[item_id].message.
-"""
 import os
 import secrets
 
@@ -46,24 +38,19 @@ def create_app(db_url=None):
   
 
   
-  # -----------Check if token exist in redis----------------
+  # -----------------Redis check token----------------------
   @jwt.token_in_blocklist_loader
   def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
     jti = jwt_payload["jti"]
     token_in_redis = jwt_redis_blocklist.get(jti)
     return token_in_redis is not None
-  # -----------Check if token exist in redis----------------
+  # -----------------Redis check token----------------------
   
-  
-  # -------------- Logout section-----------------
-  # @jwt.token_in_blocklist_loader
-  # def check_if_token_in_blocklist(jwt_header, jwt_payload):
-  #   return jwt_payload["jti"] in BLOCKLIST
-  
+
   @jwt.revoked_token_loader
   def revoked_token_callback(jwt_header, jwt_payload):
     return (jsonify({"description": "The token has been revoked.", "error": "token_revoked"}), 401)
-  # -------------- Logout section-----------------
+
   
   # optional extra info para o jwt em todas as vezes que um token é gerado
   @jwt.additional_claims_loader
