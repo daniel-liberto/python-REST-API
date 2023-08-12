@@ -4,6 +4,7 @@ import secrets
 from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 from db import db
 from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES,jwt_redis_blocklist
@@ -29,6 +30,7 @@ def create_app(db_url=None):
   app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL","sqlite:///data.db") # database connection
   app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
   db.init_app(app) # inicia flask SQLAlchemy e ainda "invoca" o proprio Flask(app = Flask(__name__)) em si para se conectarem
+  migrate = Migrate(app, db)
 
   api = Api(app)
   
@@ -72,9 +74,10 @@ def create_app(db_url=None):
   def missing_token_callback(error):
     return(jsonify({"description": "Request does not contain an access token.", "error": "authorization_required"}), 401)
 
-  with app.app_context(): 
-    db.create_all() # este comando vai criar todas as tabelas no banco
-    # SQLAlchemy sabe exatamente quais tabelas criar graças ao "__tablename__" dentro dos models
+  # with app.app_context(): 
+  #   # este comando vai criar todas as tabelas no banco
+  #   db.create_all() 
+  #   # SQLAlchemy sabe exatamente quais tabelas criar graças ao "__tablename__" dentro dos models
 
   api.register_blueprint(ItemBlueprint)
   api.register_blueprint(StoreBlueprint)
