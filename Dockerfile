@@ -12,4 +12,4 @@ COPY . .
 # CMD ["flask", "run", "--host", "0.0.0.0"]
 
 # deploy
-CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:create_app()"]
+CMD ["/bin/bash", "docker-entrypoint.sh"]
