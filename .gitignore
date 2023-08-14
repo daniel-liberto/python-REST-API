@@ -2,7 +2,9 @@ dump
 env
 .env
 .vscode
-__pycache__
-data.db
+__pycache__/
+*.py[cod]
+*$py.class
 *.pyc
+data.db
 .DS_Store
