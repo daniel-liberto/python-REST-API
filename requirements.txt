@@ -9,3 +9,4 @@ redis
 flask-migrate
 gunicorn
 psycopg2
+flask-cors

@@ -6,6 +6,7 @@ from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv # run .env file
+from flask_cors import CORS
 
 from db import db
 from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES,jwt_redis_blocklist
@@ -18,6 +19,7 @@ from resources.user import blp as UserBlueprint
 
 def create_app(db_url=None):
   app = Flask(__name__)  # Initializing flask app
+  CORS(app)
   load_dotenv()
 
   app.config["PROPAGATE_EXCEPTIONS"] = True # facilita exceções de extensões para o arquivo main do Flask
