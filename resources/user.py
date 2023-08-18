@@ -1,9 +1,10 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt
+from flask_jwt_extended import (create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt)
 
 from db import db
+from datetime import datetime
 from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES,jwt_redis_blocklist
 from models import UserModel
 from schemas import UserSchema
@@ -42,13 +43,22 @@ class UserLogin(MethodView):
 class TokenRefresh(MethodView):
   @jwt_required(refresh=True)
   def post(self):
-    current_user = get_jwt_identity()
-    new_token = create_access_token(identity=current_user, fresh=False)
-    jti = get_jwt()["jti"]
-    jwt_redis_blocklist.set(jti, "", ex=REFRESH_EXPIRES)
-    return {"access_token": new_token}, 200
+  # -------check if are access_token and not expired----
+    current_token = get_jwt()
+    if current_token['type'] != 'access':
+      return{"message": "Invalid token type"}, 400
+    else: 
+      current_expDate = datetime.datetime.utcfromtimestamp(current_token['exp'])
+      current_timeNow = datetime.datetime.utcnow()
+      if current_expDate > current_timeNow:
+        return {"message": "Access token is not expired yet"}, 400
+      else:
+        current_user = get_jwt_identity()
+        new_token = create_access_token(identity=current_user, fresh=False)
+        jti = get_jwt()["jti"]
+        jwt_redis_blocklist.set(jti, "", ex=REFRESH_EXPIRES)
+        return {"access_token": new_token}, 200
 
-# -----------------Logout Redis Section-----------
 @blp.route("/logout")
 class UserLogout(MethodView):
   @jwt_required(verify_type=False)
@@ -56,7 +66,6 @@ class UserLogout(MethodView):
     jti = get_jwt()["jti"]
     jwt_redis_blocklist.set(jti, "", ex=ACCESS_EXPIRES)
     return {"message": "Successfully logged out."}
-# -----------------Logout Redis Section-----------
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
