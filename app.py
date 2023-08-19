@@ -8,9 +8,8 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv # run .env file
 from flask_cors import CORS
 
-import redis
 from db import db
-from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES, db_redis
+from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES, jwt_redis_blocklist
 import models  # this trigger __init__.py in models folder
 
 from resources.item import blp as ItemBlueprint
@@ -35,7 +34,12 @@ def create_app(db_url=None):
   app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL_POSTGRES", "sqlite:///data.db") # database connection
   app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
   db.init_app(app) # inicia flask SQLAlchemy e ainda "invoca" o proprio Flask(app = Flask(__name__)) em si para se conectarem
-  jwt_redis_blocklist = redis.from_url(db_redis)
+  
+  @app.before_request
+  def init_redis():
+    with app.app_context():
+      jwt_redis_blocklist
+
   migrate = Migrate(app, db)
 
   api = Api(app)
