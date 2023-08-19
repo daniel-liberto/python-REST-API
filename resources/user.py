@@ -3,9 +3,10 @@ from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, get_jwt
 
+from app import jwt_redis_blocklist
 from db import db
 from datetime import datetime
-from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES, jwt_redis_blocklist
+from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES
 from models import UserModel
 from schemas import UserSchema
 
