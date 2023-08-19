@@ -44,8 +44,8 @@ class TokenRefresh(MethodView):
   @jwt_required()
   def post(self):
     current_token = get_jwt()
-    current_expDate = datetime.datetime.utcfromtimestamp(current_token['exp'])
-    current_timeNow = datetime.datetime.utcnow()
+    current_expDate = datetime.utcfromtimestamp(current_token['exp'])
+    current_timeNow = datetime.utcnow()
     if current_expDate > current_timeNow:
       return {"message": "Access token is not expired yet"}, 400
     else:

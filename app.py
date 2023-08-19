@@ -1,12 +1,12 @@
 import os
 import secrets
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, Response
 from flask_smorest import Api
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv # run .env file
-from flask_cors import CORS
+# from flask_cors import CORS
 
 from db import db
 from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES, jwt_redis_blocklist
@@ -19,8 +19,10 @@ from resources.user import blp as UserBlueprint
 
 def create_app(db_url=None):
   app = Flask(__name__)  # Initializing flask app
-  CORS(app)
+  # CORS(app, resources={r"/*": {"origins": "*"}})
   load_dotenv()
+  
+  app.config['CORS_HEADERS'] = 'Content-Type'
 
   app.config["PROPAGATE_EXCEPTIONS"] = True # facilita exceções de extensões para o arquivo main do Flask
   app.config["API_TITLE"] = "Stores REST API" # titulo da api
@@ -34,6 +36,11 @@ def create_app(db_url=None):
   app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL_POSTGRES", "sqlite:///data.db") # database connection
   app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
   db.init_app(app) # inicia flask SQLAlchemy e ainda "invoca" o proprio Flask(app = Flask(__name__)) em si para se conectarem
+
+  @app.before_request
+  def cors_authentication(): 
+    if request.method.lower() == 'options': 
+      return Response(), 200
   
   @app.before_request
   def init_redis():
