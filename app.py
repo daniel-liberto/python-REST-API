@@ -8,8 +8,9 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv # run .env file
 from flask_cors import CORS
 
+import redis
 from db import db
-from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES,jwt_redis_blocklist
+from blocklist import ACCESS_EXPIRES, REFRESH_EXPIRES, db_redis
 import models  # this trigger __init__.py in models folder
 
 from resources.item import blp as ItemBlueprint
@@ -31,14 +32,15 @@ def create_app(db_url=None):
   app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/" # npm do swagger
   
   # primeiro tenta conectar em db_url, se não haver conexão então DATABASE_URL será o proximo, ou em ultimo caso o sqlite
-  app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL","sqlite:///data.db") # database connection
+  app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL_POSTGRES", "sqlite:///data.db") # database connection
   app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
   db.init_app(app) # inicia flask SQLAlchemy e ainda "invoca" o proprio Flask(app = Flask(__name__)) em si para se conectarem
+  jwt_redis_blocklist = redis.from_url(db_redis)
   migrate = Migrate(app, db)
 
   api = Api(app)
   
-  app.config["JWT_SECRET_KEY"] = "227908941795316218633443429225171957379"
+  app.config["JWT_SECRET_KEY"] = os.getenv('SECRET_KEY')
   app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
   app.config["JWT_REFRESH_TOKEN_EXPIRES"] = REFRESH_EXPIRES
   jwt = JWTManager(app)
