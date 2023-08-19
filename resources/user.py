@@ -41,7 +41,7 @@ class UserLogin(MethodView):
 
 @blp.route("/refresh")
 class TokenRefresh(MethodView):
-  @jwt_required(refresh=True)
+  @jwt_required()
   def post(self):
     current_token = get_jwt()
     current_expDate = datetime.datetime.utcfromtimestamp(current_token['exp'])
@@ -53,7 +53,7 @@ class TokenRefresh(MethodView):
       new_token = create_access_token(identity=current_user, fresh=False)
       jti = get_jwt()["jti"]
       jwt_redis_blocklist.set(jti, "", ex=REFRESH_EXPIRES)
-      return {"access_token": new_token}, 200
+      return {"message": "Successfully refreshed token.", "access_token": new_token}, 200
 
 @blp.route("/logout")
 class UserLogout(MethodView):
