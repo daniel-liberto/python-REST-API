@@ -47,7 +47,7 @@ class TokenRefresh(MethodView):
     current_expDate = datetime.utcfromtimestamp(current_token['exp'])
     current_timeNow = datetime.utcnow()
     if current_expDate > current_timeNow:
-      return {"message": "Access token is not expired yet"}, 400
+      return {"message": "Access token is not expired yet"}, 200
     else:
       current_user = get_jwt_identity()
       new_token = create_access_token(identity=current_user, fresh=False)
