@@ -43,21 +43,17 @@ class UserLogin(MethodView):
 class TokenRefresh(MethodView):
   @jwt_required(refresh=True)
   def post(self):
-  # -------check if are access_token and not expired----
     current_token = get_jwt()
-    if current_token['type'] != 'access':
-      return{"message": "Invalid token type"}, 400
-    else: 
-      current_expDate = datetime.datetime.utcfromtimestamp(current_token['exp'])
-      current_timeNow = datetime.datetime.utcnow()
-      if current_expDate > current_timeNow:
-        return {"message": "Access token is not expired yet"}, 400
-      else:
-        current_user = get_jwt_identity()
-        new_token = create_access_token(identity=current_user, fresh=False)
-        jti = get_jwt()["jti"]
-        jwt_redis_blocklist.set(jti, "", ex=REFRESH_EXPIRES)
-        return {"access_token": new_token}, 200
+    current_expDate = datetime.datetime.utcfromtimestamp(current_token['exp'])
+    current_timeNow = datetime.datetime.utcnow()
+    if current_expDate > current_timeNow:
+      return {"message": "Access token is not expired yet"}, 400
+    else:
+      current_user = get_jwt_identity()
+      new_token = create_access_token(identity=current_user, fresh=False)
+      jti = get_jwt()["jti"]
+      jwt_redis_blocklist.set(jti, "", ex=REFRESH_EXPIRES)
+      return {"access_token": new_token}, 200
 
 @blp.route("/logout")
 class UserLogout(MethodView):
